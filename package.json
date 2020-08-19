@@ -1,7 +1,7 @@
 {
-  "name": "react-express-starter",
+  "name": "Headless-cms",
   "version": "1.0.0",
-  "description": "A starter pack for React with Express and NodeJS",
+  "description": "A simple app to write articles and post them on different blogs",
   "main": "./dist/app.js",
   "scripts": {
     "server-install": "npm install --prefix server",
