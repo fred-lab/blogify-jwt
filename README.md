@@ -19,7 +19,7 @@ From your command line:
 ```bash
 
 # Clone this repo
-git clone https://github.com/fred-lab/docker_mern.git
+git clone https://github.com/fred-lab/blogify.git
 
 # Create a **.env** file and edit the values with your owns values
 cp .env.dist .env
