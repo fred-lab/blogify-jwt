@@ -1,19 +1,46 @@
-# Docker environment for a Nodejs application
+# Blogify : My own Headless CMS
 
-> A ligthweight Docker environment to run NodeJS application with ExpressJS and MongoDB. The ExpressJS server is in "server" folder, you can add a React app at the root and start the server with a npm command (like : npm run dev --prefix server).
+> A simple app to write articles and post them on different blogs (my blog, medium, dev.io ...)
 
-## Quick Start
+# Credits
 
-- Clone this repo : `git clone https://github.com/fred-lab/docker_mern.git`
+This software uses the following open source packages:
 
-- Create a **.env** file : `cp .env.dist .env`  
-  Edit the values as you see fit
+- **NodeJS** with **ExpressJS**
+- **MongoDB** with **Mongoose**
+- **React** to make the application
+- **Docker** to host everything :smiley:
 
-- Install server dependencies : `npm install --prefix server`
+# Quick Start
 
-- Start a server :
-  For production environment, use the NodeJS server : `npm run prod --prefix server`  
-   For development environment, use the Nodemon (to automatically reload the NodeJS server when a change is done on the server): `npm run dev --prefix server`  
-  The **NodeJS** server provide the application on **http://localhost:3000** by default.
+To clone and run this application, you'll need [Git](https://git-scm.com/) and [Node.js](https://nodejs.org/en/) (which comes with npm) installed on your computer.  
+From your command line:
 
-- You can, now, create a project at the root of this folder
+```bash
+
+# Clone this repo
+git clone https://github.com/fred-lab/docker_mern.git
+
+# Create a **.env** file and edit the values with your owns values
+cp .env.dist .env
+
+# Install server dependencies :
+npm install --prefix server
+
+#Install application dependencies :
+npm install
+
+# Start a server :
+#For production environment, use the NodeJS server :
+npm run prod --prefix server
+
+# For development environment, use the Nodemon (to automatically reload the NodeJS server when a change is done on the server):
+npm run dev --prefix server
+
+```
+
+The **NodeJS** server provide the application on **http://localhost:3000** by default.
+
+# License
+
+MIT
