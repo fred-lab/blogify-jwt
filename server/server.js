@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '../.env' });
 const path = require('path');
 const express = require('express');
+const compression = require('compression');
 
 const app = express();
 const mongoose = require('mongoose');
@@ -15,15 +16,21 @@ const {
 } = process.env;
 
 // Serve the files inside the dist folder where Webpack generate assets
-app.use(express.static('../dist'));
+app.use(express.static(path.join(__dirname, '../dist')));
 // Configure the view rendering
 app.set('view engine', 'ejs');
 app.set('views', [path.join(__dirname, '/..'), 'views']);
 app.engine('html', require('ejs').renderFile);
 
-app.get('/', (req, res) => {
-  res.render('index.html');
-});
+/** Use Gzip Compression */
+app.use(compression());
+
+/** For parsing application/json */
+app.use(express.json());
+app.use(express.urlencoded({ extended: false })); // for parsing application/x-www-form-urlencoded
+
+/** Routers */
+app.use('/', require('./controllers/index'));
 
 /** Initiate connection to the database */
 (async () => {

@@ -39,7 +39,10 @@ npm run dev --prefix server
 
 ```
 
-The **NodeJS** server provide the application on **http://localhost:3000** by default.
+# Usage
+
+The **Docker** server provide the application on **http://localhost:80** by default (depending on which port you have specified in the **.env** file).  
+Same as the **Mongo-express** interface is available on **http://localhost:8081**
 
 # License
 
