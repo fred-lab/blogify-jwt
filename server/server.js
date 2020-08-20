@@ -31,6 +31,7 @@ app.use(express.urlencoded({ extended: false })); // for parsing application/x-w
 
 /** Routers */
 app.use('/', require('./controllers/index'));
+app.use('/api/user', require('./controllers/user'));
 
 /** Initiate connection to the database */
 (async () => {
@@ -40,6 +41,7 @@ app.use('/', require('./controllers/index'));
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
+        useCreateIndex: true,
         auth: {
           authSource: MONGO_INITDB_DATABASE,
         },
