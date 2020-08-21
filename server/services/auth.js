@@ -81,7 +81,7 @@ const sendRefreshCookie = (res, user) => {
   return res.cookie('jid', createRefreshToken(user), {
     httpOnly: true,
     domain,
-    path: '/refresh_token',
+    path: '/api/user/refresh_token',
   });
 };
 
@@ -90,6 +90,7 @@ const sendRefreshCookie = (res, user) => {
  * @param {string} token
  */
 const verifyToken = async (token, key) => {
+  console.log('verify ', token);
   if (!token)
     throw new Error(
       `Provide a valid token to verify. Token provided = ${token}`,

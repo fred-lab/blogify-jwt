@@ -1,7 +1,7 @@
 const { verifyAccessToken } = require('../services/auth');
 
 /**
- * Check if a request is authenticated with a valid JWT Token
+ * Check if a request is authenticated with a valid JWT Access Token
  * @param {Object} req
  * @param {Object} res
  * @param {Function} next

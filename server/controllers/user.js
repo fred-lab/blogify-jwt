@@ -3,7 +3,7 @@ const User = require('../models/user');
 const {
   authenticate,
   createAccessToken,
-  verifyAccessToken,
+  verifyRefreshToken,
   sendRefreshCookie,
 } = require('../services/auth');
 const { isAuthenticate } = require('../middleware/auth');
@@ -77,24 +77,31 @@ router.post('/refresh_token', isAuthenticate, async (req, res) => {
       access_token: '',
     });
   }
+  // Extract the refresh token
+  const refreshToken = req.cookies.jid;
 
-  const token = req.cookies.jid;
-
-  if (!token)
+  if (!refreshToken)
     return res.json({ message: 'Token is missing', access_token: '' });
 
   let payload = null;
   try {
-    payload = await verifyAccessToken(token);
+    // Check if the refresh token is valid
+    payload = await verifyRefreshToken(refreshToken);
   } catch (error) {
-    console.error(error);
+    console.error('err ', error);
     return res.json({ message: 'Authentication expired', access_token: '' });
   }
 
-  // Token is valid. Find the user to refresh his acess token
+  if (!payload) {
+    return res.json({ message: 'Token is invalid', access_token: '' });
+  }
+
+  // Refresh token is valid. Find the user to refresh his acess token
   try {
     const user = await User.findById(payload.id);
-    // Refresh and send the refresh token via an HTTP Only cookie
+    if (!user) return res.json({ message: 'User not found', access_token: '' });
+
+    // Send a new refresh token via an HTTP Only cookie
     sendRefreshCookie(res, user);
     // Refresh and send a new JWT Access Token
     return res.status(200).json({
