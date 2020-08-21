@@ -69,12 +69,37 @@ const createRefreshToken = (user) => {
 };
 
 /**
+ * Send a cookie which contains the refresh token
+ * Path must be equal to the route to refresh the token
+ * @param {Object} res
+ * @param {Object} user
+ */
+const sendRefreshCookie = (res, user) => {
+  const { APP_ENV, NGINX_DOMAIN } = process.env;
+  const domain = APP_ENV === 'prod' ? NGINX_DOMAIN : 'localhost';
+
+  return res.cookie('jid', createRefreshToken(user), {
+    httpOnly: true,
+    domain,
+    path: '/refresh_token',
+  });
+};
+
+/**
  * Verify a Token
  * @param {string} token
  */
-const verifyToken = (token, key) => {
-  if (!token) throw new Error('Provide a token to verify');
-  return verify(token, key);
+const verifyToken = async (token, key) => {
+  if (!token)
+    throw new Error(
+      `Provide a valid token to verify. Token provided = ${token}`,
+    );
+
+  try {
+    return verify(token, key);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -96,4 +121,5 @@ module.exports = {
   createRefreshToken,
   verifyAccessToken,
   verifyRefreshToken,
+  sendRefreshCookie,
 };

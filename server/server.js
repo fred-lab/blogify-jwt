@@ -2,6 +2,8 @@ require('dotenv').config({ path: '../.env' });
 const path = require('path');
 const express = require('express');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const app = express();
 const mongoose = require('mongoose');
@@ -15,6 +17,15 @@ const {
   MONGO_USER_PASSWORD,
 } = process.env;
 
+// Tell Express we are behin a proxy (nginx)
+app.set('trust proxy');
+// Allow HTTP cookies to be send overs CORS
+app.use(
+  cors({
+    credentials: true,
+  }),
+);
+
 // Serve the files inside the dist folder where Webpack generate assets
 app.use(express.static(path.join(__dirname, '../dist')));
 // Configure the view rendering
@@ -24,6 +35,9 @@ app.engine('html', require('ejs').renderFile);
 
 /** Use Gzip Compression */
 app.use(compression());
+
+/** Parse Cookies */
+app.use(cookieParser());
 
 /** For parsing application/json */
 app.use(express.json());

@@ -1,6 +1,11 @@
 const express = require('express');
 const User = require('../models/user');
-const { authenticate, createAccessToken } = require('../services/auth');
+const {
+  authenticate,
+  createAccessToken,
+  verifyAccessToken,
+  sendRefreshCookie,
+} = require('../services/auth');
 const { isAuthenticate } = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,9 +26,9 @@ router.post('/create', isAuthenticate, async (req, res) => {
 
   try {
     const response = await user.save();
-    res.status(201).json({ message: response });
+    return res.status(201).json({ message: response });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 });
 
@@ -38,14 +43,19 @@ router.post('/login', async (req, res) => {
     const isAuth = await authenticate(user, password);
 
     if (isAuth) {
+      // Send JWT Access Token via an HTTP cookie
+      sendRefreshCookie(res, user);
+
       // Send JWT Access Token
-      res
-        .status(200)
-        .json({ message: 'log in', access_token: createAccessToken(user) });
+      return res.json({
+        message: 'log in',
+        access_token: createAccessToken(user),
+      });
     }
-    res.status(401).json({ message: 'Bad Credentials' });
+    return res.status(401).json({ message: 'Bad Credentials' });
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    console.error(error.message);
+    return res.status(401).json({ message: 'Not authenticated' });
   }
 });
 
@@ -53,7 +63,48 @@ router.post('/login', async (req, res) => {
  * Log out an user
  */
 router.get('/logout', isAuthenticate, (req, res) => {
-  res.json({ message: 'log out' });
+  return res.json({ message: 'log out' });
+});
+
+/**
+ * A route to refresh the access token.
+ * The client must send a cookie with a key nammed 'jid' and the content must be the refresh token
+ */
+router.post('/refresh_token', isAuthenticate, async (req, res) => {
+  if (!req.cookies) {
+    return res.json({
+      message: 'Cookies are missing',
+      access_token: '',
+    });
+  }
+
+  const token = req.cookies.jid;
+
+  if (!token)
+    return res.json({ message: 'Token is missing', access_token: '' });
+
+  let payload = null;
+  try {
+    payload = await verifyAccessToken(token);
+  } catch (error) {
+    console.error(error);
+    return res.json({ message: 'Authentication expired', access_token: '' });
+  }
+
+  // Token is valid. Find the user to refresh his acess token
+  try {
+    const user = await User.findById(payload.id);
+    // Refresh and send the refresh token via an HTTP Only cookie
+    sendRefreshCookie(res, user);
+    // Refresh and send a new JWT Access Token
+    return res.status(200).json({
+      message: 'Acces token refreshed',
+      access_token: createAccessToken(user),
+    });
+  } catch (error) {
+    console.error(error);
+    res.json({ message: 'User not found', access_token: '' });
+  }
 });
 
 module.exports = router;
