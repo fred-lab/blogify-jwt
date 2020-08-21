@@ -1,13 +1,14 @@
 const express = require('express');
 const User = require('../models/user');
-const { authenticate } = require('../services/auth');
+const { authenticate, createAccessToken } = require('../services/auth');
+const { isAuthenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
 /**
  * Create an User
  */
-router.post('/create', async (req, res) => {
+router.post('/create', isAuthenticate, async (req, res) => {
   const { username, lastname, password, email, role } = req.body;
 
   const user = new User({
@@ -37,7 +38,10 @@ router.post('/login', async (req, res) => {
     const isAuth = await authenticate(user, password);
 
     if (isAuth) {
-      res.status(200).json({ message: 'log in' });
+      // Send JWT Access Token
+      res
+        .status(200)
+        .json({ message: 'log in', access_token: createAccessToken(user) });
     }
     res.status(401).json({ message: 'Bad Credentials' });
   } catch (error) {
@@ -48,7 +52,7 @@ router.post('/login', async (req, res) => {
 /**
  * Log out an user
  */
-router.get('/logout', (req, res) => {
+router.get('/logout', isAuthenticate, (req, res) => {
   res.json({ message: 'log out' });
 });
 

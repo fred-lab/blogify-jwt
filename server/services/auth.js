@@ -25,7 +25,7 @@ const authenticate = async (user, password) => {
   if (!user) {
     throw new Error('Provide a valid User');
   }
-  if (!user.hasOwnProperty.call('password')) {
+  if (!user.password) {
     throw new Error('Missing "password" key');
   }
 
@@ -33,16 +33,25 @@ const authenticate = async (user, password) => {
 };
 
 /**
+ * Check if an user is a valid user to provid to the create token methods
+ * @param {Object} user
+ */
+const checkUser = (user) => {
+  if (!user) throw new Error('Provide an user');
+  if (!user._id) {
+    throw new Error('Provide an user with an ID key');
+  }
+  return true;
+};
+
+/**
  * Create an Access Token for a given User
  * @param {Object} user
  */
 const createAccessToken = (user) => {
-  if (!user) throw new Error('Provide an user');
-  if (!user.hasOwnProperty.call('id')) {
-    throw new Error('Provide an user with an ID key');
-  }
+  checkUser(user);
 
-  return sign({ id: user.id }, ACCESS_TOKEN_KEY, {
+  return sign({ id: user._id }, ACCESS_TOKEN_KEY, {
     expiresIn: '15m',
   });
 };
@@ -52,10 +61,7 @@ const createAccessToken = (user) => {
  * @param {Object} user
  */
 const createRefreshToken = (user) => {
-  if (!user) throw new Error('Provide an user');
-  if (!user.hasOwnProperty.call('id')) {
-    throw new Error('Provide an user with an ID key');
-  }
+  checkUser(user);
 
   return sign({ id: user.id }, REFRESH_TOKEN_KEY, {
     expiresIn: '7d',
