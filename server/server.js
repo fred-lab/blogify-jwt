@@ -30,7 +30,7 @@ app.use(
 app.use(express.static(path.join(__dirname, '../dist')));
 // Configure the view rendering
 app.set('view engine', 'ejs');
-app.set('views', [path.join(__dirname, '/..'), 'views']);
+app.set('views', [path.join(__dirname, '../dist'), 'views']);
 app.engine('html', require('ejs').renderFile);
 
 /** Use Gzip Compression */
@@ -46,6 +46,8 @@ app.use(express.urlencoded({ extended: false })); // for parsing application/x-w
 /** Routers */
 app.use('/', require('./controllers/index'));
 app.use('/api/user', require('./controllers/user'));
+
+app.get('*', (req, res) => res.redirect('/'));
 
 /** Initiate connection to the database */
 (async () => {

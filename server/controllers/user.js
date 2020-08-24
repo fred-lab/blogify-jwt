@@ -37,7 +37,7 @@ router.post('/create', isAuthenticate, async (req, res) => {
  */
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
+  console.log('request : ', email, password);
   try {
     const user = await User.findOne({ email });
     const isAuth = await authenticate(user, password);
@@ -45,11 +45,16 @@ router.post('/login', async (req, res) => {
     if (isAuth) {
       // Send JWT Access Token via an HTTP cookie
       sendRefreshCookie(res, user);
-
+      console.log(user);
       // Send JWT Access Token
       return res.json({
         message: 'log in',
         access_token: createAccessToken(user),
+        isAuth,
+        role: user.role,
+        firstname: user.username,
+        lastname: user.lastname,
+        email: user.email,
       });
     }
     return res.status(401).json({ message: 'Bad Credentials' });

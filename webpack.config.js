@@ -11,10 +11,7 @@ const sourcePath = path.resolve(__dirname, 'src');
 const config = {
   mode: 'development',
   entry: {
-    app: [
-      `${sourcePath}/js/main.jsx`,
-      `${sourcePath}/scss/main.scss`,
-    ],
+    app: [`${sourcePath}/js/main.jsx`, `${sourcePath}/scss/main.scss`],
   },
   optimization: {
     splitChunks: {
@@ -104,7 +101,7 @@ const config = {
     new CleanWebpackPlugin(),
     /* Create /dist/index.html */
     new HtmlWebpackPlugin({
-      title: 'React with Express start pack',
+      title: 'Blogify',
       template: 'index.html',
     }),
     /* Create a manifest.json */
