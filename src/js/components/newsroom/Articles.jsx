@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Authcontext from '../auth/authContext';
-import { LOGOUT } from '../auth/authReducer';
+import { LOGOUT, REFRESH } from '../auth/authReducer';
 import { getUser } from '../../api';
 
 export default function Articles() {
@@ -15,7 +15,6 @@ export default function Articles() {
           try {
             const request = await getUser(user.id);
             const response = await request.json();
-            console.log(response);
           } catch (error) {
             console.log('front ', error);
           }
@@ -29,6 +28,16 @@ export default function Articles() {
         ))}
       </ul>
       <p onClick={(e) => dispatch({ type: LOGOUT })}>Logout</p>
+      <div
+        onClick={(e) =>
+          dispatch({
+            type: REFRESH,
+            payload: { isAuth: true, accessToken: 'toto' },
+          })
+        }
+      >
+        Refresh
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Parameters from './parameters';
 import { getAccessToken, setAccessToken } from './services/auth';
+
 const jwtDecode = require('jwt-decode');
 
 export const postRefreshToken = () => {
@@ -9,19 +10,29 @@ export const postRefreshToken = () => {
 };
 
 const request = async (method, route, headers = {}, body = undefined) => {
+  /** For every request (except for login), try to refresh the access token */
   if (getAccessToken() && route !== Parameters.api.login) {
     const { exp } = jwtDecode(getAccessToken());
 
+    /** Check if the current access token is still valid */
     if (Date.now() <= exp * 1000) {
       const data = await postRefreshToken();
       const response = await data.json();
-
-      console.log('r ', response);
 
       setAccessToken(response.access_token);
     } else {
       setAccessToken('');
     }
+
+    /** Trigger a custom event to signal that a new access token has been generated */
+    const refreshEvent = new CustomEvent('refresh_token', {
+      detail: {
+        accessToken: getAccessToken(),
+        isAuth: getAccessToken() !== '',
+      },
+    });
+
+    document.dispatchEvent(refreshEvent);
   }
 
   return fetch(route, {

@@ -2,6 +2,7 @@ import { setAccessToken } from '../../services/auth';
 
 export const LOGIN = 'login';
 export const LOGOUT = 'logout';
+export const REFRESH = 'refresh';
 export const initialState = {
   isAuth: false,
   access_token: '',
@@ -28,6 +29,16 @@ const login = (state, payload) => {
   };
 };
 
+const refresh = (state, payload) => {
+  const { accessToken, isAuth } = payload;
+
+  return {
+    ...state,
+    isAuth,
+    access_token: accessToken,
+  };
+};
+
 export default function AuthReducer(state, action) {
   const { type, payload } = action;
 
@@ -36,6 +47,8 @@ export default function AuthReducer(state, action) {
       return login(state, payload);
     case LOGOUT:
       return initialState;
+    case REFRESH:
+      return refresh(state, payload);
     default:
       throw new Error(`Action type : ${type} is not defined`);
   }

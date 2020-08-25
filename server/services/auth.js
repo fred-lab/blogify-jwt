@@ -52,7 +52,7 @@ const createAccessToken = (user) => {
   checkUser(user);
 
   return sign({ id: user._id }, ACCESS_TOKEN_KEY, {
-    expiresIn: '7s',
+    expiresIn: '15m',
   });
 };
 
