@@ -52,7 +52,7 @@ const createAccessToken = (user) => {
   checkUser(user);
 
   return sign({ id: user._id }, ACCESS_TOKEN_KEY, {
-    expiresIn: '15m',
+    expiresIn: '7s',
   });
 };
 
@@ -86,34 +86,38 @@ const sendRefreshCookie = (res, user) => {
 };
 
 /**
- * Verify a Token
+ * Verify a Access Token
  * @param {string} token
  */
-const verifyToken = async (token, key) => {
-  console.log('verify ', token);
+const verifyAccessToken = (token) => {
   if (!token)
     throw new Error(
       `Provide a valid token to verify. Token provided = ${token}`,
     );
 
   try {
-    return verify(token, key);
+    return verify(token, ACCESS_TOKEN_KEY);
   } catch (error) {
-    console.error(error);
+    throw new Error(error);
   }
 };
-
-/**
- * Verify a Access Token
- * @param {string} token
- */
-const verifyAccessToken = (token) => verifyToken(token, ACCESS_TOKEN_KEY);
 
 /**
  * Verify a Refresh Token
  * @param {string} token
  */
-const verifyRefreshToken = (token) => verifyToken(token, REFRESH_TOKEN_KEY);
+const verifyRefreshToken = (token) => {
+  if (!token)
+    throw new Error(
+      `Provide a valid token to verify. Token provided = ${token}`,
+    );
+
+  try {
+    return verify(token, REFRESH_TOKEN_KEY);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
 module.exports = {
   hash,

@@ -37,7 +37,7 @@ router.post('/create', isAuthenticate, async (req, res) => {
  */
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  console.log('request : ', email, password);
+
   try {
     const user = await User.findOne({ email });
     const isAuth = await authenticate(user, password);
@@ -45,12 +45,13 @@ router.post('/login', async (req, res) => {
     if (isAuth) {
       // Send JWT Access Token via an HTTP cookie
       sendRefreshCookie(res, user);
-      console.log(user);
+
       // Send JWT Access Token
       return res.json({
         message: 'log in',
         access_token: createAccessToken(user),
         isAuth,
+        id: user._id,
         role: user.role,
         firstname: user.username,
         lastname: user.lastname,
@@ -75,9 +76,9 @@ router.get('/logout', isAuthenticate, (req, res) => {
  * A route to refresh the access token.
  * The client must send a cookie with a key nammed 'jid' and the content must be the refresh token
  */
-router.post('/refresh_token', isAuthenticate, async (req, res) => {
+router.post('/refresh_token', async (req, res) => {
   if (!req.cookies) {
-    return res.json({
+    return res.status(401).json({
       message: 'Cookies are missing',
       access_token: '',
     });
@@ -86,7 +87,10 @@ router.post('/refresh_token', isAuthenticate, async (req, res) => {
   const refreshToken = req.cookies.jid;
 
   if (!refreshToken)
-    return res.json({ message: 'Token is missing', access_token: '' });
+    return res.status(401).json({
+      message: 'Token is missing',
+      access_token: '',
+    });
 
   let payload = null;
   try {
@@ -94,29 +98,61 @@ router.post('/refresh_token', isAuthenticate, async (req, res) => {
     payload = await verifyRefreshToken(refreshToken);
   } catch (error) {
     console.error('err ', error);
-    return res.json({ message: 'Authentication expired', access_token: '' });
+    return res.status(401).json({
+      message: 'Authentication expired',
+      access_token: '',
+    });
   }
 
   if (!payload) {
-    return res.json({ message: 'Token is invalid', access_token: '' });
+    return res.status(401).json({
+      message: 'Token is invalid',
+      access_token: '',
+    });
   }
 
   // Refresh token is valid. Find the user to refresh his acess token
+  let user = null;
   try {
-    const user = await User.findById(payload.id);
-    if (!user) return res.json({ message: 'User not found', access_token: '' });
-
-    // Send a new refresh token via an HTTP Only cookie
-    sendRefreshCookie(res, user);
-    // Refresh and send a new JWT Access Token
-    return res.status(200).json({
-      message: 'Acces token refreshed',
-      access_token: createAccessToken(user),
-    });
+    user = await User.findById(payload.id);
+    if (!user)
+      return res.status(401).json({
+        message: 'User not found',
+        access_token: '',
+      });
   } catch (error) {
     console.error(error);
-    res.json({ message: 'User not found', access_token: '' });
+    res.status(401).json({
+      message: 'User not found',
+      access_token: '',
+    });
   }
+  // Send a new refresh token via an HTTP Only cookie
+  sendRefreshCookie(res, user);
+  // Refresh and send a new JWT Access Token
+  return res.status(200).json({
+    message: 'Acces token refreshed',
+    access_token: createAccessToken(user),
+    isAuth: true,
+    id: user._id,
+    role: user.role,
+    firstname: user.username,
+    lastname: user.lastname,
+    email: user.email,
+  });
+});
+
+router.get('/:id', isAuthenticate, async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  res.json({
+    user: {
+      role: user.role,
+      firstname: user.username,
+      lastname: user.lastname,
+      email: user.email,
+    },
+  });
 });
 
 module.exports = router;

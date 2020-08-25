@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import Api from '../../api';
+import { postLogin } from '../../api';
 import AuthContext from './authContext';
 import { LOGIN } from './authReducer';
 
@@ -18,7 +18,7 @@ export default function login() {
   const submit = async (e) => {
     e.preventDefault();
 
-    const request = await Api.login({
+    const request = await postLogin({
       email,
       password,
     });
